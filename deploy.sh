@@ -170,15 +170,20 @@ function DownloadSources () {
 # Onto the main build!
 
 function MakeBinutils {
-	
     echo -e "\033[92mConfigure, build and install binutils\033[0m"
-	cd build-binutils
-	    if [ $OUTPUT == false ]
+
+    # Start with a clean build directory
+    cd i686-elf-src
+    rm -rf build-binutils
+    mkdir build-binutils
+    cd build-binutils
+	
+    if [ $OUTPUT == false ]
     then
         ../binutils-$BINUTILS_VERSION/configure --target=$TARGET --prefix="$PREFIX" --with-sysroot --disable-nls --disable-werror > binutils-configure.txt > /dev/null
         make > binutils-make.txt > /dev/null 
 	    make install > binutils-install.txt > /dev/null
-	else
+    else
         ../binutils-$BINUTILS_VERSION/configure --target=$TARGET --prefix="$PREFIX" --with-sysroot --disable-nls --disable-werror > binutils-configure.txt
         make > binutils-make.txt
 	    make install > binutils-install.txt
