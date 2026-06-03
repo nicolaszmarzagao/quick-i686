@@ -44,6 +44,31 @@ function CheckOS {
     fi
 }
 
+function CheckPrerequisites {
+    echo -e "\033[92mChecking build prerequisites...\033[0m"
+    local missing=0
+    
+    for cmd in gcc g++ make bison flex m4; do
+        if ! command -v $cmd &> /dev/null; then
+            echo -e "\033[91mMissing: $cmd\033[0m"
+            missing=1
+        fi
+    done
+    
+    if [ $missing -eq 1 ]; then
+        echo -e "\033[93mInstalling missing packages...\033[0m"
+        if [ "$OS" == "Linux" ]; then
+            sudo apt update
+            sudo apt install -y gcc g++ make bison flex m4
+        elif [ "$OS" == "MacOS" ]; then
+            echo "Please install missing tools: brew install bison flex m4"
+            exit 1
+        fi
+    else
+        echo -e "\033[92mAll prerequisites found!\033[0m"
+    fi
+}
+
 function pause {
     read -s -n 1 -p "Press any key to continue . . ."
     echo ""
