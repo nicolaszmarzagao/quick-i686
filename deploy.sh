@@ -191,17 +191,50 @@ function MakeBinutils {
 	cd ..
 }
 
-function MakeGCC {
 
+function MakeGCC {
     echo -e "\033[92mConfigure, build and install GCC cross compiler\033[0m"
-	which -- $TARGET-as || echo $TARGET-as is not in the PATH
-	cd build-gcc
-	../gcc-$GCC_VERSION/configure --target=$TARGET --prefix="$PREFIX" --disable-nls --enable-languages=c,c++,go --without-headers > gcc-configure.txt
-	make all-gcc >  all-gcc.txt 
-	make all-target-libgcc > all-target-libgcc.txt
-	make install-gcc > install-gcc.txt
-	make install-target-libgcc > install-target-libgcc.txt
-	cd ..
+    
+    # Verify binutils installed correctly
+    if ! command -v $TARGET-as &> /dev/null; then
+        echo -e "\033[91mError: $TARGET-as not found in PATH. Did binutils install correctly?\033[0m"
+        echo "Current PATH: $PATH"
+        exit 1
+    fi
+    
+    # CRITICAL FIX: Start with a clean build directory
+    cd i686-elf-src
+    rm -rf build-gcc
+    mkdir build-gcc
+    cd build-gcc
+    
+    if [ $OUTPUT == false ]
+    then
+        ../gcc-$GCC_VERSION/configure --target=$TARGET --prefix="$PREFIX" --disable-nls --enable-languages=c --without-headers --disable-multilib > gcc-configure.log 2>&1
+        make all-gcc > all-gcc.log 2>&1 
+        make all-target-libgcc > all-target-libgcc.log 2>&1
+        make install-gcc > install-gcc.log 2>&1
+        make install-target-libgcc > install-target-libgcc.log 2>&1
+    else
+        echo "Configuring GCC..."
+        ../gcc-$GCC_VERSION/configure --target=$TARGET --prefix="$PREFIX" --disable-nls --enable-languages=c --without-headers --disable-multilib 2>&1 | tee gcc-configure.log
+        
+        # Check if configure succeeded
+        if [ ${PIPESTATUS[0]} -ne 0 ]; then
+            echo -e "\033[91mGCC configure failed! Check gcc-configure.log\033[0m"
+            exit 1
+        fi
+        
+        echo "Building GCC (this will take 15-30 minutes)..."
+        make -j$JOBS all-gcc 2>&1 | tee all-gcc.log
+        echo "Building libgcc..."
+        make -j$JOBS all-target-libgcc 2>&1 | tee all-target-libgcc.log
+        echo "Installing GCC..."
+        make install-gcc 2>&1 | tee install-gcc.log
+        make install-target-libgcc 2>&1 | tee install-target-libgcc.log
+    fi
+    
+    cd ../..
 }
 
 function MakeGDB {
