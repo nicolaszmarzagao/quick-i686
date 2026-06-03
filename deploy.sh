@@ -235,6 +235,31 @@ function MakeGCC {
     cd ../..
 }
 
+function MakeGDB {
+    echo -e "\033[92mConfigure, build and install GDB\033[0m"
+    
+    cd $HOME/i686-elf-src
+    rm -rf build-gdb
+    mkdir build-gdb
+    cd build-gdb
+    
+    if [ $OUTPUT == false ]
+    then
+        ../gdb-$GDB_VERSION/configure --target=$TARGET --disable-nls --disable-werror --prefix=$PREFIX > gdb-configure.log 2>&1
+        make > gdb-make.log 2>&1
+        make install > gdb-install.log 2>&1
+    else
+        echo "Configuring GDB..."
+        ../gdb-$GDB_VERSION/configure --target=$TARGET --disable-nls --disable-werror --prefix=$PREFIX 2>&1 | tee gdb-configure.log
+        echo "Building GDB (this may take a while)..."
+        make -j$JOBS 2>&1 | tee gdb-make.log
+        echo "Installing GDB..."
+        make install 2>&1 | tee gdb-install.log
+    fi
+    
+    cd $HOME
+}
+
 
 function cleanUp {
 
