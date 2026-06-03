@@ -257,11 +257,12 @@ function cleanUp {
 	rm -rf i686-elf-src
 }
 
-function main() {
 
+function main() {
     pushd $HOME
-	arg=$1
+    arg=$1
     CheckOS
+    CheckPrerequisites
     
     if [ "$*" == "--silent" ]
     then
