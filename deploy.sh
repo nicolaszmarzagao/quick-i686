@@ -26,6 +26,8 @@ function CheckOS {
         JOBS=$(nproc)
     fi
 
+    export MAKEFLAGS="-j$JOBS" 
+
     if [ $OS == "MacOS" ]
     then
         echo -e "\033[92mYou appear to be running macOS, which requires the Xcode command line tools to be installed. Checking to see if developer tools are installed...\033[0m"
@@ -105,8 +107,13 @@ function mkdirs {
 
 
 function DownloadSources () {
-    
-	echo -e "\033[92mDownload sources\033[0m"
+    echo -e "\033[92mDownload sources\033[0m"
+
+    if ! wget --spider https://ftp.gnu.org/ 2>/dev/null; then
+        echo -e "\033[91mError: Cannot reach ftp.gnu.org. Check your internet connection.\033[0m"
+        exit 1
+    fi
+
     if [ "$AT" == "gz" ]
     then
         echo "Using GZIP compression"
@@ -171,8 +178,10 @@ function DownloadSources () {
 
 function MakeBinutils {
     echo -e "\033[92mConfigure, build and install binutils\033[0m"
+    
+    local SRC_ROOT="$HOME/i686-elf-src"
 
-    cd $HOME/i686-elf-src
+    cd "$SRC_ROOT" || { echo "Cannot cd to $SRC_ROOT"; exit 1; }
     rm -rf build-binutils
     mkdir build-binutils
     cd build-binutils
