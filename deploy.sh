@@ -172,8 +172,7 @@ function DownloadSources () {
 function MakeBinutils {
     echo -e "\033[92mConfigure, build and install binutils\033[0m"
 
-    # Start with a clean build directory
-    cd i686-elf-src
+    cd $HOME/i686-elf-src
     rm -rf build-binutils
     mkdir build-binutils
     cd build-binutils
@@ -202,8 +201,7 @@ function MakeGCC {
         exit 1
     fi
     
-    # CRITICAL FIX: Start with a clean build directory
-    cd i686-elf-src
+    cd $HOME/i686-elf-src
     rm -rf build-gcc
     mkdir build-gcc
     cd build-gcc
@@ -237,19 +235,6 @@ function MakeGCC {
     cd ../..
 }
 
-
-function MakeGCC {
-
-    echo -e "\033[92mConfigure, build and install GCC cross compiler\033[0m"
-	which -- $TARGET-as || echo $TARGET-as is not in the PATH
-	cd build-gcc
-	../gcc-$GCC_VERSION/configure --target=$TARGET --prefix="$PREFIX" --disable-nls --enable-languages=c,c++,go --without-headers > gcc-configure.txt
-	make all-gcc >  all-gcc.txt 
-	make all-target-libgcc > all-target-libgcc.txt
-	make install-gcc > install-gcc.txt
-	make install-target-libgcc > install-target-libgcc.txt
-	cd ..
-}
 
 function cleanUp {
 
