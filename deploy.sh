@@ -237,13 +237,17 @@ function MakeGCC {
     cd ../..
 }
 
-function MakeGDB {
-	
-    echo -e "\033[92mConfigure, build and install GDB\033[0m"
-	cd build-gdb
-	../gdb-$GDB_VERSION/configure --target=$TARGET --disable-nls --disable-werror --prefix=$PREFIX > gdb-configure.txt
-	make > gdb-make.txt
-	make install > gdb-install.txt
+
+function MakeGCC {
+
+    echo -e "\033[92mConfigure, build and install GCC cross compiler\033[0m"
+	which -- $TARGET-as || echo $TARGET-as is not in the PATH
+	cd build-gcc
+	../gcc-$GCC_VERSION/configure --target=$TARGET --prefix="$PREFIX" --disable-nls --enable-languages=c,c++,go --without-headers > gcc-configure.txt
+	make all-gcc >  all-gcc.txt 
+	make all-target-libgcc > all-target-libgcc.txt
+	make install-gcc > install-gcc.txt
+	make install-target-libgcc > install-target-libgcc.txt
 	cd ..
 }
 
